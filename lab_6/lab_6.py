@@ -1,0 +1,105 @@
+# Вариант №6
+# Root = 6; height = 5, left_leaf = (root*2)-2, right_leaf = root+4
+import timeit
+import matplotlib.pyplot as plt
+
+def build_tree_recursive(root=6, height=5, left_leaf=lambda root: (root*2)-2, right_leaf=lambda root: root+4) -> dict or None:
+    """
+    Функция, которая строит дерево по заданным параметрам (есть значения по умолчанию):
+    root -> значение корня (самого первого числа)
+    height -> высота дерева (глубина списка со словарями)
+    left_leaf и right_leaf -> лямбда-функции - формулы для левой и правой ветки соответственно
+    При корректном вводе данных возвращает словарь, состоящий из:
+        {'значение корня': [{'результат формулы для левой ветки': [...]},{'результат формулы для правой ветки': [...]}]}
+    При некорректном вводе данных, возвращает "None"
+    """
+
+    # Проверяем, являются ли корень и высота целыми числами
+    if type(root) != int or type(height) != int:
+        return None
+    # Проверяем, являются ли левая и правая ветки (лямбда)функциями
+    if type(left_leaf) != type(lambda: None) or type(right_leaf) != type(lambda: None):
+        return None
+
+    # Проверяем, равна ли высота дерева 0
+    if height == 0:
+        return {str(root): []}
+
+    return {str(root): [build_tree_recursive(left_leaf(root), height - 1), build_tree_recursive(right_leaf(root), height - 1)]}
+
+def build_tree_iterative(root=6, height=5, left_leaf=lambda root: (root*2)-2, right_leaf=lambda root: root+4) -> dict or None:
+    """
+    Функция, которая строит дерево по заданным параметрам (есть значения по умолчанию):
+    root -> значение корня (самого первого числа)
+    height -> высота дерева (глубина списка со словарями)
+    left_leaf и right_leaf -> лямбда-функции - формулы для левой и правой ветки соответственно
+    При корректном вводе данных возвращает словарь, состоящий из:
+        {'значение корня': [{'результат формулы для левой ветки': [...]},{'результат формулы для правой ветки': [...]}]}
+    При некорректном вводе данных, возвращает "None"
+    """
+
+    # Проверяем, являются ли корень и высота целыми числами
+    if type(root) != int or type(height) != int:
+        return None
+    # Проверяем, являются ли левая и правая ветки (лямбда)функциями
+    if type(left_leaf) != type(lambda: None) or type(right_leaf) != type(lambda: None):
+        return None
+
+    # Создаем дерево
+    tree = {str(root): []}
+    # Создаем список, состоящий из дерева и числа-ключа
+    current_branch = [[tree, root]]
+    # Открываем цикл for, зависящий от заданной высоты дерева
+    for i in range(height):
+        # Создаем пустой список (или очищаем старый), в который будем передавать ветки, которые будем расширять далее
+        next_branch = []
+        # Открываем цикл for, который берет 2 значения (словарь-ветка и ключ этого словаря) за каждую ветку в текущем списке
+        for branch, key in current_branch:
+            # Создаем 2 переменные (используя формулы в параметрах функции), которые содержат следующие 2 ветки от данной
+            left = left_leaf(key)
+            right = right_leaf(key)
+            # Создаем список, в который добавляем следующие 2 ветки (созданных выше)
+            two_leaves = [
+                {str(left): []},
+                {str(right): []}
+            ]
+            # Меняем значение текущей ветки, добавляя следующие 2 ветки
+            branch[str(key)] = two_leaves
+            # Добавляем в пустой список ещё 2 списка, содержащие по одной из следующих 2 веток(словарей) и по ключу, к этим веткам
+            next_branch.extend([[two_leaves[0], left], [two_leaves[1], right]])
+        # Меняем текущую ветку на следующую (для цикла for)
+        current_branch = next_branch
+
+    return tree
+
+def benchmark(func, n:int, repeat=5):
+    """Возвращает среднее время выполнения func(n)"""
+    times = timeit.repeat(lambda: func(height=n), number=1, repeat=repeat)
+    return min(times)
+
+def main():
+
+    result_recursive = []
+    result_iterative = []
+
+    for number in range(6):
+        result_recursive.append(benchmark(build_tree_recursive, number))
+        result_iterative.append(benchmark(build_tree_iterative, number))
+
+    plt.plot(result_recursive, label="Рекурсивный")
+    plt.plot(result_iterative, label="Итеративный")
+    plt.xlabel("Высота дерева")
+    plt.ylabel("Время (сек)")
+    plt.title("Сравнение рекурсивного и итеративного построения дерева")
+    plt.legend()
+    plt.show()
+
+    # print(f'Список: {test_data}')
+    # print()
+    # print(result_recursive)
+    # print()
+    # print(result_iterative)
+    # print()
+
+if __name__ == '__main__':
+    main()

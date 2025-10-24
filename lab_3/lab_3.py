@@ -1,7 +1,7 @@
 # Вариант №6
 # Root = 6; height = 5, left_leaf = (root*2)-2, right_leaf = root+4
 
-def gen_bin_tree(root=6, height=5, left_leaf=lambda root: (root*2)-2, right_leaf=lambda root: root+4):
+def gen_bin_tree(root=6, height=5, left_leaf=lambda root: (root*2)-2, right_leaf=lambda root: root+4) -> dict or None:
     """
     Функция, которая строит дерево по заданным параметрам (есть значения по умолчанию):
     root -> значение корня (самого первого числа)
